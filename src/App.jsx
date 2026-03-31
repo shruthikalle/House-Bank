@@ -109,7 +109,7 @@ function App() {
     <main className="app-shell">
       <section className="hero-panel">
         <p className="eyebrow">Poker Settlement</p>
-        <h1>Split the pot with no house bank</h1>
+        <h1>Fuck banking cuz its sped af</h1>
         <p className="hero-copy">
           Enter what each player entered with and what they exited with.
           Net profit/loss is calculated automatically.
@@ -199,8 +199,8 @@ function App() {
       <section className="result-panel">
         <h2>Direct payout instructions</h2>
         <p className="result-copy">
-          These transfers settle all balances in the fewest direct person-to-person
-          moves based on entered and exit amounts.
+          This is the most optimized banking with the lowest transactions needed
+          based on entered and exit amounts.
         </p>
 
         {!canSettle ? (
