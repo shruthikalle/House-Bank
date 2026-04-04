@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 
 const STARTING_PLAYERS = [
@@ -8,6 +8,44 @@ const STARTING_PLAYERS = [
 ]
 
 const EPSILON = 0.001
+const PLAYERS_STORAGE_KEY = 'poker.players.v1'
+
+function isValidPlayer(player) {
+  return (
+    player &&
+    typeof player.id === 'number' &&
+    typeof player.name === 'string' &&
+    Number.isFinite(Number(player.brought)) &&
+    Number.isFinite(Number(player.left))
+  )
+}
+
+function loadPlayersFromStorage() {
+  try {
+    const raw = localStorage.getItem(PLAYERS_STORAGE_KEY)
+    if (!raw) {
+      return STARTING_PLAYERS
+    }
+
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) {
+      return STARTING_PLAYERS
+    }
+
+    const safePlayers = parsed
+      .filter(isValidPlayer)
+      .map((player) => ({
+        id: Number(player.id),
+        name: player.name,
+        brought: Number(player.brought),
+        left: Number(player.left),
+      }))
+
+    return safePlayers.length ? safePlayers : STARTING_PLAYERS
+  } catch {
+    return STARTING_PLAYERS
+  }
+}
 
 function normalizeMoney(value) {
   return Math.round(value * 100) / 100
@@ -57,7 +95,11 @@ function computeSettlements(players) {
 }
 
 function App() {
-  const [players, setPlayers] = useState(STARTING_PLAYERS)
+  const [players, setPlayers] = useState(loadPlayersFromStorage)
+
+  useEffect(() => {
+    localStorage.setItem(PLAYERS_STORAGE_KEY, JSON.stringify(players))
+  }, [players])
 
   const playersWithNet = useMemo(
     () => players.map((player) => ({ ...player, net: getNet(player) })),
@@ -105,6 +147,11 @@ function App() {
     setPlayers((current) => current.filter((player) => player.id !== id))
   }
 
+  function resetSavedData() {
+    localStorage.removeItem(PLAYERS_STORAGE_KEY)
+    setPlayers(STARTING_PLAYERS)
+  }
+
   return (
     <main className="app-shell">
       <section className="hero-panel">
@@ -137,6 +184,9 @@ function App() {
           <div className="button-row">
             <button type="button" onClick={addPlayer}>
               Add player
+            </button>
+            <button type="button" onClick={resetSavedData} className="ghost">
+              Reset saved data
             </button>
           </div>
         </header>
